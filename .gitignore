@@ -1,0 +1,12 @@
+# Personal working files — never meant for the public repo.
+# Only index.html, og-image.jpg, wedding-music.mp3, and the docs
+# markdown are intentionally tracked. Everything else stays local.
+*.jpg
+*.jpeg
+*.png
+*.mp3
+*.wav
+
+# ...except the three files the deployed site actually needs:
+!og-image.jpg
+!wedding-music.mp3
