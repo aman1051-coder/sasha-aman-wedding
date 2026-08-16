@@ -719,16 +719,20 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
    nothing to scroll past or miss. */
 @media(max-width:768px){
   .nav-toggle{display:flex;}
+  /* display:none/flex, not opacity — the same proven pattern as the
+     lightbox (#lb) elsewhere on this page. A fade transition here
+     was occasionally failing to resolve, leaving the menu invisible
+     despite being technically "open"; a hard display toggle has no
+     transition state to get stuck in. */
   .nav-links{
+    display:none;
     position:fixed;inset:0;
     flex-direction:column;justify-content:center;align-items:center;
     gap:0.3rem;
     background:rgba(248,243,235,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
     overflow-x:visible;overflow-y:auto;padding:5rem 1.5rem 2rem;
-    opacity:0;visibility:hidden;pointer-events:none;
-    transition:opacity 0.4s ease,visibility 0s linear 0.4s;
   }
-  .nav-links.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.4s ease;}
+  .nav-links.open{display:flex;}
   .nav-links li{width:100%;max-width:320px;text-align:center;}
   .nav-links .nav-btn{
     width:100%;padding:0.9rem;font-size:0.8rem !important;letter-spacing:3px;
