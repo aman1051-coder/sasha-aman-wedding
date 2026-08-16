@@ -365,7 +365,7 @@ body.intro-done .hero-names{animation:hUp 1.1s ease 0.15s forwards;}
 .hero-heart{color:rgba(255,255,255,0.9);display:inline-block;font-size:0.72em;vertical-align:middle;margin:0 0.18em;}
 .hero-tagline{
   font-family:var(--serif);font-style:italic;
-  font-size:clamp(0.9rem,2.3vw,1.18rem);
+  font-size:clamp(0.98rem,2.4vw,1.18rem);
   color:rgba(255,255,255,0.87);margin-top:1rem;line-height:1.95;
   opacity:0;
   max-width:450px;text-shadow:0 1px 10px rgba(42,32,24,0.18);
@@ -425,7 +425,7 @@ body.intro-done .hero-date{animation:hUp 1.1s ease 0.65s forwards;}
 .intro-poem{font-family:var(--serif);font-style:italic;font-size:clamp(1.14rem,2.6vw,1.22rem);color:var(--ink-lt);line-height:2.1;max-width:500px;margin:1.4rem auto 0;}
 .intro-venue{font-family:var(--serif);font-size:clamp(1.3rem,3.5vw,2rem);letter-spacing:4px;text-transform:uppercase;color:var(--ink);margin-top:2rem;}
 .intro-loc{font-family:var(--script);font-size:clamp(2rem,4.5vw,3rem);color:var(--sage);}
-.intro-date{font-family:var(--display);font-size:clamp(0.58rem,1.4vw,0.7rem);letter-spacing:5px;text-transform:uppercase;color:var(--ink-lt);margin-top:0.35rem;}
+.intro-date{font-family:var(--display);font-size:clamp(0.64rem,1.5vw,0.7rem);letter-spacing:5px;text-transform:uppercase;color:var(--ink-lt);margin-top:0.35rem;}
 
 /* ─────────────── FLORAL MONOGRAM ─────────────── */
 .floral-section{
@@ -492,7 +492,7 @@ body.intro-done .hero-date{animation:hUp 1.1s ease 0.65s forwards;}
 .s-card:hover .s-icon{transform:translateY(-8px) scale(1.08);}
 .s-title{font-family:var(--display);font-size:clamp(0.7rem,1.6vw,0.76rem);letter-spacing:4px;text-transform:uppercase;color:var(--ink-mid);transition:color 0.35s;margin-bottom:0.3rem;}
 .s-card:hover .s-title{color:var(--gold);}
-.s-sub{font-family:var(--serif);font-style:italic;font-size:clamp(0.8rem,1.7vw,0.95rem);color:var(--ink-lt);}
+.s-sub{font-family:var(--serif);font-style:italic;font-size:clamp(0.88rem,1.8vw,0.95rem);color:var(--ink-lt);}
 
 /* ─────────────── CLOSING / RSVP ─────────────── */
 .closing{
@@ -811,6 +811,18 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   .btn-rsvp{font-size:0.74rem;}
   .f-input,.f-select{font-size:1.05rem;}
   .f-input::placeholder{font-size:0.98rem;}
+  /* Third pass: home page (countdown, "Add to Calendar") and a few
+     general-site elements (itinerary day sub-label, gallery captions/
+     upload labels, venue card headers) that the first two passes
+     didn't reach yet. Same approach - fixed fS0 -> a mobile-only bump. */
+  .cd-unit{font-size:0.58rem;}
+  .cd-cal-btn{font-size:0.58rem;}
+  .day-sub{font-size:0.72rem;}
+  .g-album-sub{font-size:0.62rem;}
+  .up-txt{font-size:0.64rem;}
+  .up-sub{font-size:0.67rem;}
+  .vg-cap,.m-cap{font-size:0.85rem;}
+  .log-card h3{font-size:1.08rem;}
 }
 @media(max-width:480px){
   .form-row{grid-template-columns:1fr;}
@@ -1234,7 +1246,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   </header>
   <div class="gallery-intro reveal" style="padding-top:2rem;">
     <div class="sec-script" style="font-size:2.4rem;">Captured in time</div>
-    <p style="font-family:var(--serif);font-style:italic;color:var(--ink-lt);font-size:1rem;line-height:2;max-width:400px;margin:0.8rem auto 0;">Our favourite moments together — and soon, the memories we'll make with all of you in Goa.</p>
+    <p style="font-family:var(--serif);font-style:italic;color:var(--ink-lt);font-size:1.08rem;line-height:2;max-width:400px;margin:0.8rem auto 0;">Our favourite moments together — and soon, the memories we'll make with all of you in Goa.</p>
   </div>
   <a class="g-album-link reveal" href="https://photos.app.goo.gl/wgSf6wYjjk5B7c597" target="_blank" rel="noopener">
     <div>
