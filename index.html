@@ -1278,21 +1278,25 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
 <script>
 /* ══════════════════════════════════════════
    BACKGROUND MUSIC — on by default, as close as a browser allows
-   Every modern browser blocks audio-with-sound from autoplaying
-   until the visitor has interacted with the page at all — that's a
-   deliberate anti-annoyance policy, not something any site's code
-   can switch off. What we *can* do: try to play the instant the
-   page loads (succeeds in some contexts), and if the browser blocks
-   that, start automatically on the very first tap/click/key press
-   anywhere on the page — which for most guests is a fraction of a
-   second after arriving. The element lives outside the .page divs,
-   so playback survives switching between sections.
+   Every modern browser blocks audio-WITH-SOUND from autoplaying until
+   the visitor interacts with the page — deliberate anti-annoyance
+   policy, not something any site's code can switch off. But browsers
+   *do* always allow silent (muted) autoplay, and separately let a
+   page unmute already-playing audio on the visitor's first gesture
+   without a fresh play() call. So: start the track muted the instant
+   the page loads — it's already running in the background from
+   second zero — then the first tap/click/key anywhere just flips it
+   audible. That unmute is effectively instant (no play()-promise
+   delay, no gesture-policy wait), which is as close to "starts the
+   moment the site opens" as a browser will allow. The element lives
+   outside the .page divs, so playback survives switching sections.
 ══════════════════════════════════════════ */
 (function(){
   const audio = document.getElementById('bg-music');
   const btn = document.getElementById('music-toggle');
   let userPaused = false;
-  let playRequestInFlight = false;
+  let unlocked = false; // true once the track is actually audible
+  let pendingPlay = null; // the in-flight play() promise, if any
 
   function setPlayingUI(isPlaying){
     btn.classList.toggle('playing', isPlaying);
@@ -1300,49 +1304,70 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
     btn.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
   }
 
-  // 'scroll' is included on request, but it's worth knowing it can
-  // never actually be what starts playback — browsers don't count a
-  // scroll as a qualifying "user gesture" for autoplay, so play()
-  // will always be silently rejected on it specifically. It's
-  // harmless to listen for (the guard above just lets the next real
-  // tap/click/key take over), just not what does the real work.
-  const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown','scroll'];
-  function attemptAutoplay(){
-    // A single tap fires several of these listeners back to back
-    // (pointerdown, touchstart, touchend, click can all fire for one
-    // touch). audio.paused doesn't flip to false until play()'s
-    // promise actually resolves, so without this guard, all of them
-    // could call play() before the first one finishes — overlapping
-    // play() calls on the same element is a known trigger for the
-    // browser aborting one in favor of another, which can leave
-    // nothing actually playing despite a "successful" first attempt.
-    if(userPaused || !audio.paused || playRequestInFlight) return;
-    playRequestInFlight = true;
-    audio.play().then(()=>{
-      playRequestInFlight = false;
-      setPlayingUI(true);
-      // Only stop listening once it actually worked. 'scroll' used to
-      // be in this list too, but scrolling doesn't count as a "user
-      // gesture" to the browser's autoplay policy — play() would
-      // silently fail on it, and since cleanup ran regardless of
-      // success, that one failed attempt could permanently use up
-      // the only try, leaving every later, genuinely qualifying tap
-      // with nothing left listening. Now every qualifying interaction
-      // keeps retrying until one actually succeeds.
-      unlockEvents.forEach(ev=>document.removeEventListener(ev, attemptAutoplay));
-    }).catch(()=>{
-      playRequestInFlight = false;
-      /* still blocked — the next interaction will retry */
-    });
+  // Never call play() while a previous call on this element hasn't
+  // settled yet — overlapping play() requests are a known trigger for
+  // the browser aborting one in favor of another, which can leave
+  // nothing actually playing even though a "successful" attempt was
+  // made. Every caller below chains onto the same in-flight promise
+  // instead of racing it with a fresh one.
+  function safePlay(){
+    if(pendingPlay) return pendingPlay;
+    pendingPlay = audio.play().finally(()=>{ pendingPlay = null; });
+    return pendingPlay;
   }
 
-  attemptAutoplay();
-  unlockEvents.forEach(ev=>document.addEventListener(ev, attemptAutoplay, {passive:true}));
+  // Kick off muted playback immediately — this is allowed everywhere,
+  // so the track is already rolling by the time any gesture arrives.
+  // In the rare case even muted autoplay is blocked, the first
+  // qualifying gesture below retries a real play() too.
+  audio.muted = true;
+  safePlay().catch(()=>{});
+
+  // 'scroll' is included on request. Worth knowing: per browser spec it
+  // never itself qualifies as a "user gesture" for audio, on desktop
+  // scrolling with no click/touch involved — that's a hard, deliberate
+  // browser policy no site's code can bypass (otherwise any page could
+  // blast sound just by being scrolled). It's harmless to listen for
+  // regardless, and on phones — most guests — a scroll gesture begins
+  // with a touchstart, which *is* a qualifying gesture, so music starts
+  // the instant a guest's finger touches the screen to scroll.
+  const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown','scroll'];
+  function unlock(){
+    if(userPaused || unlocked) return;
+    // A touchstart can fire before the page-load muted play() above
+    // has actually settled (audio.paused is still true in the
+    // meantime) — wait for that same in-flight request to finish
+    // rather than firing a second, overlapping one on top of it.
+    if(pendingPlay){ pendingPlay.then(go, go); } else { go(); }
+  }
+  function go(){
+    if(userPaused || unlocked) return; // re-check: state may have changed while waiting
+    audio.muted = false;
+    const finish = ()=>{
+      unlocked = true;
+      setPlayingUI(true);
+      unlockEvents.forEach(ev=>document.removeEventListener(ev, unlock));
+    };
+    if(!audio.paused){
+      // Already playing (the muted autoplay succeeded) — unmuting is
+      // all that's needed, so sound starts on this exact gesture.
+      finish();
+    } else {
+      // Muted autoplay didn't take earlier; this gesture qualifies for
+      // a real play() attempt.
+      safePlay().then(finish).catch(()=>{
+        audio.muted = true; // stay muted; the next qualifying gesture retries
+      });
+    }
+  }
+
+  unlockEvents.forEach(ev=>document.addEventListener(ev, unlock, {passive:true}));
 
   window.toggleMusic = function(){
     if(audio.paused){
       userPaused = false;
-      audio.play().then(()=>setPlayingUI(true)).catch(()=>{});
+      audio.muted = false;
+      safePlay().then(()=>{ unlocked = true; setPlayingUI(true); }).catch(()=>{});
     } else {
       userPaused = true;
       audio.pause();
