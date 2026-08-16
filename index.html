@@ -1026,7 +1026,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   <div class="container">
     <div style="text-align:center;" class="reveal">
       <div class="sec-script">The Beginning</div>
-      <div class="sec-disp">September 3, 2019</div>
+      <div class="sec-disp">July 1, 2019</div>
     </div>
     <div class="orn reveal"><div class="orn-l"></div><div class="orn-gem">&#9670;</div><div class="orn-r"></div></div>
     <p class="body-text reveal">A boy from the streets of Delhi and a girl shaped by the salt and soul of Goa — two people who should have remained strangers somehow found their way to the same moment. Not with fireworks, but with something quieter and more lasting: the ease of talking to someone who simply gets it. In the beginning, it was long messages, shared playlists, and finding excuses to extend plans by just ten more minutes.</p>
@@ -1300,7 +1300,13 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
     btn.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
   }
 
-  const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown'];
+  // 'scroll' is included on request, but it's worth knowing it can
+  // never actually be what starts playback — browsers don't count a
+  // scroll as a qualifying "user gesture" for autoplay, so play()
+  // will always be silently rejected on it specifically. It's
+  // harmless to listen for (the guard above just lets the next real
+  // tap/click/key take over), just not what does the real work.
+  const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown','scroll'];
   function attemptAutoplay(){
     // A single tap fires several of these listeners back to back
     // (pointerdown, touchstart, touchend, click can all fire for one
