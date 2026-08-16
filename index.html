@@ -15,6 +15,7 @@
 <meta name="twitter:title" content="Sasha ♡ Aman · Goa 2026">
 <meta name="twitter:description" content="Two cities. Two faiths. One love. Join us in Goa, 4th &amp; 5th December 2026.">
 <meta name="twitter:image" content="https://aman1051-coder.github.io/sasha-aman-wedding/og-image.jpg">
+<link rel="icon" id="favicon" href="">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&family=Great+Vibes&family=Cinzel:wght@300;400&display=swap" rel="stylesheet">
 <style>
 /* ─────────────── TOKENS ─────────────── */
@@ -179,19 +180,6 @@ button{cursor:none;font-family:var(--sans);}
   transform:scaleX(0);transform-origin:left;transition:transform 0.12s linear;pointer-events:none;
   box-shadow:0 0 8px rgba(184,146,74,0.5);
 }
-#shutter-line{
-  position:fixed;top:50%;left:0;width:100%;height:1px;z-index:99985;
-  background:linear-gradient(90deg,transparent,var(--gold-lt),var(--gold),var(--gold-lt),transparent);
-  transform:scaleX(0);opacity:0;pointer-events:none;
-}
-#shutter-line.fire{animation:shutterSweep 0.7s cubic-bezier(0.4,0,0.2,1);}
-@keyframes shutterSweep{
-  0%{transform:scaleX(0);opacity:0;}
-  25%{opacity:1;}
-  55%{transform:scaleX(1);opacity:1;}
-  100%{transform:scaleX(1);opacity:0;}
-}
-
 /* ─────────────── SMOOTH SCROLL (desktop only) ─────────────── */
 #smooth-wrapper{width:100%;}
 #scroll-spacer{width:100%;display:none;}
@@ -220,7 +208,10 @@ nav.scrolled{
 .nav-links{display:flex;list-style:none;flex:1;justify-content:flex-end;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .nav-links::-webkit-scrollbar{display:none;}
 /* Hamburger — hidden on desktop, where all 7 links fit in a row. */
-.nav-toggle{display:none;flex-direction:column;justify-content:center;gap:5px;width:26px;height:22px;background:none;border:none;flex-shrink:0;cursor:none;}
+/* The three bars stay a compact 26x22 visually, but the actual
+   tappable button is padded out to the 44x44 minimum touch target —
+   the icon doesn't need to look bigger for the tap area to be. */
+.nav-toggle{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;padding:11px 9px;background:none;border:none;flex-shrink:0;cursor:none;}
 .nav-toggle span{display:block;width:100%;height:1.5px;background:currentColor;transition:transform 0.3s,opacity 0.3s;}
 nav:not(.scrolled) .nav-toggle{color:#fff;}
 nav.scrolled .nav-toggle{color:var(--ink-mid);}
@@ -796,7 +787,6 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
 <body class="locked">
 
 <div id="scroll-progress"></div>
-<div id="shutter-line"></div>
 <div id="cur-dot"></div>
 <div id="cur-ring"></div>
 
@@ -1352,6 +1342,10 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   const src = document.querySelector('.nav-mono') && document.querySelector('.nav-mono').src;
   if(!src) return;
   document.querySelectorAll('.hero-mono-img,.closing-mono,.ph-mono,.f-mono').forEach(img=>{ img.src = src; });
+  // Same monogram again as the browser-tab favicon — no extra bytes,
+  // reuses the one already embedded rather than adding a copy.
+  const favicon = document.getElementById('favicon');
+  if(favicon) favicon.href = src;
 })();
 
 /* ══════════════════════════════════════════
@@ -1690,12 +1684,6 @@ function pageTransitionBurst(){
    NAV / ROUTING
 ══════════════════════════════════════════ */
 const navBtns=document.querySelectorAll('.nav-btn');
-const shutterEl=document.getElementById('shutter-line');
-function fireShutter(){
-  shutterEl.classList.remove('fire');
-  void shutterEl.offsetWidth; // restart animation
-  shutterEl.classList.add('fire');
-}
 function toggleMobileNav(){
   const links = document.getElementById('nav-links');
   const toggle = document.getElementById('nav-toggle');
@@ -1724,7 +1712,6 @@ function go(id,i){
   newPage.classList.add('active');
   void newPage.offsetHeight; // force the browser to lay out the new page now, synchronously, before anything below measures it
   document.getElementById('nav').classList.toggle('scrolled', id==='page-rsvp');
-  fireShutter();
   pageTransitionBurst();
   setTimeout(triggerReveals,120);
   /* On desktop, #smooth-wrapper's own rAF loop provides the eased
@@ -1944,12 +1931,19 @@ syncGalleryPhotos();
 /* ══════════════════════════════════════════
    LIGHTBOX
 ══════════════════════════════════════════ */
-const lbSrcs=[]; let lbIdx=0;
-function collectLB(){lbSrcs.length=0;document.querySelectorAll('#gallery-grid .m-item img').forEach(i=>lbSrcs.push(i.src));}
-function openLB(i){collectLB();lbIdx=i;document.getElementById('lb-img').src=lbSrcs[lbIdx];document.getElementById('lb').classList.add('open');document.body.style.overflow='hidden';}
+const lbSrcs=[]; const lbAlts=[]; let lbIdx=0;
+function collectLB(){
+  lbSrcs.length=0; lbAlts.length=0;
+  document.querySelectorAll('#gallery-grid .m-item img').forEach(i=>{ lbSrcs.push(i.src); lbAlts.push(i.alt||'Wedding guest photo'); });
+}
+function showLB(){
+  document.getElementById('lb-img').src=lbSrcs[lbIdx];
+  document.getElementById('lb-img').alt=lbAlts[lbIdx];
+}
+function openLB(i){collectLB();lbIdx=i;showLB();document.getElementById('lb').classList.add('open');document.body.style.overflow='hidden';}
 document.getElementById('lb-close').onclick=()=>{document.getElementById('lb').classList.remove('open');document.body.style.overflow='';};
-document.getElementById('lb-prev').onclick=()=>{lbIdx=(lbIdx-1+lbSrcs.length)%lbSrcs.length;document.getElementById('lb-img').src=lbSrcs[lbIdx];};
-document.getElementById('lb-next').onclick=()=>{lbIdx=(lbIdx+1)%lbSrcs.length;document.getElementById('lb-img').src=lbSrcs[lbIdx];};
+document.getElementById('lb-prev').onclick=()=>{lbIdx=(lbIdx-1+lbSrcs.length)%lbSrcs.length;showLB();};
+document.getElementById('lb-next').onclick=()=>{lbIdx=(lbIdx+1)%lbSrcs.length;showLB();};
 document.getElementById('lb').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');document.body.style.overflow='';}});
 let tX=0;
 document.getElementById('lb').addEventListener('touchstart',e=>tX=e.touches[0].clientX,{passive:true});
