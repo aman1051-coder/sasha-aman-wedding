@@ -791,7 +791,9 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
 <div id="cur-ring"></div>
 
 <!-- ═════════════ BACKGROUND MUSIC ═════════════ -->
-<audio id="bg-music" src="wedding-music.mp3" loop preload="auto"></audio>
+<audio id="bg-music" loop preload="auto">
+  <source src="wedding-music.mp3" type="audio/mpeg">
+</audio>
 <button type="button" id="music-toggle" class="music-toggle" onclick="toggleMusic()" aria-pressed="false" aria-label="Play background music">
   <svg viewBox="0 0 24 24">
     <path d="M9 17V4.5L20 3v12.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1290,6 +1292,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   const audio = document.getElementById('bg-music');
   const btn = document.getElementById('music-toggle');
   let userPaused = false;
+  let playRequestInFlight = false;
 
   function setPlayingUI(isPlaying){
     btn.classList.toggle('playing', isPlaying);
@@ -1299,8 +1302,18 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
 
   const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown'];
   function attemptAutoplay(){
-    if(userPaused || !audio.paused) return;
+    // A single tap fires several of these listeners back to back
+    // (pointerdown, touchstart, touchend, click can all fire for one
+    // touch). audio.paused doesn't flip to false until play()'s
+    // promise actually resolves, so without this guard, all of them
+    // could call play() before the first one finishes — overlapping
+    // play() calls on the same element is a known trigger for the
+    // browser aborting one in favor of another, which can leave
+    // nothing actually playing despite a "successful" first attempt.
+    if(userPaused || !audio.paused || playRequestInFlight) return;
+    playRequestInFlight = true;
     audio.play().then(()=>{
+      playRequestInFlight = false;
       setPlayingUI(true);
       // Only stop listening once it actually worked. 'scroll' used to
       // be in this list too, but scrolling doesn't count as a "user
@@ -1311,7 +1324,10 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
       // with nothing left listening. Now every qualifying interaction
       // keeps retrying until one actually succeeds.
       unlockEvents.forEach(ev=>document.removeEventListener(ev, attemptAutoplay));
-    }).catch(()=>{ /* still blocked — the next interaction will retry */ });
+    }).catch(()=>{
+      playRequestInFlight = false;
+      /* still blocked — the next interaction will retry */
+    });
   }
 
   attemptAutoplay();
