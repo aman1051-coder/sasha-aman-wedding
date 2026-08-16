@@ -1981,12 +1981,18 @@ async function doRSVP(e){
   const form=document.getElementById('rsvp-form');
   btn.textContent='Sending...'; btn.disabled=true;
   try{
-    const r=await fetch('https://formspree.io/f/xwpbgvnq',{
+    const r=await fetch('https://formspree.io/f/myegngja',{
       method:'POST',body:new FormData(form),headers:{Accept:'application/json'}
     });
     if(r.ok){form.style.display='none';document.getElementById('rsvp-ok').style.display='block';}
     else{btn.textContent='Please try again';btn.disabled=false;}
-  }catch{form.style.display='none';document.getElementById('rsvp-ok').style.display='block';}
+  }catch{
+    // A thrown error here means the request never got a response at all
+    // (offline, DNS failure, etc.) - previously this branch showed the
+    // success message anyway, which told guests their RSVP went through
+    // when it hadn't. Treat it the same as a failed response instead.
+    btn.textContent='Please try again';btn.disabled=false;
+  }
 }
 
 /* ══════════════════════════════════════════
