@@ -215,6 +215,16 @@ nav.scrolled{
 .nav-toggle span{display:block;width:100%;height:1.5px;background:currentColor;transition:transform 0.3s,opacity 0.3s;}
 nav:not(.scrolled) .nav-toggle{color:#fff;}
 nav.scrolled .nav-toggle{color:var(--ink-mid);}
+/* When the full-screen mobile menu is open, this same button (already
+   morphed into an "✕" below) needs to double as its close control —
+   but .nav-links.open is a fixed, full-viewport overlay with a higher
+   z-index than the nav bar's own children, so without this it visually
+   buries the toggle: the "✕" is drawn, just unreachable underneath the
+   opaque menu. Bumping it above the overlay's z-index, and forcing a
+   readable color regardless of scroll state (it can otherwise be
+   white-on-white if the menu is opened before scrolling), keeps it
+   genuinely clickable as a "close and stay on this page" control. */
+.nav-toggle.open{z-index:1002;color:var(--ink-mid) !important;}
 .nav-toggle.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
 .nav-toggle.open span:nth-child(2){opacity:0;}
 .nav-toggle.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
@@ -491,7 +501,7 @@ body.intro-done .hero-date{animation:hUp 1.1s ease 0.65s forwards;}
   filter:blur(46px);pointer-events:none;
   animation:auroraA 20s ease-in-out infinite;
 }
-.closing-mono{width:clamp(52px,9vw,72px);height:clamp(52px,9vw,72px);object-fit:contain;margin:0 auto 1.8rem;animation:monoLev 4.5s ease-in-out infinite;filter:drop-shadow(0 4px 16px rgba(184,146,74,0.14));}
+.closing-mono{width:clamp(52px,9vw,72px);height:clamp(52px,9vw,72px);object-fit:contain;margin:0 auto 1.8rem;animation:monoLev 4.5s ease-in-out infinite;filter:brightness(0.6) contrast(1.25) saturate(1.1) drop-shadow(0 4px 16px rgba(184,146,74,0.14));}
 @keyframes monoLev{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
 .closing-poem{font-family:var(--serif);font-style:italic;font-size:clamp(1rem,2.3vw,1.14rem);color:var(--ink-lt);line-height:2.15;max-width:420px;margin:1.4rem auto 2rem;}
 .closing-invite{font-family:var(--display);font-size:clamp(0.56rem,1.2vw,0.66rem);letter-spacing:4px;text-transform:uppercase;color:var(--sage);line-height:2.3;margin-bottom:2rem;}
@@ -708,7 +718,7 @@ body.intro-done .hero-date{animation:hUp 1.1s ease 0.65s forwards;}
 
 /* ─────────────── FOOTER ─────────────── */
 footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.5rem 2.5rem;text-align:center;}
-.f-mono{width:44px;height:44px;object-fit:contain;margin:0 auto 1rem;opacity:0.55;}
+.f-mono{width:clamp(48px,9vw,60px);height:clamp(48px,9vw,60px);object-fit:contain;margin:0 auto 1rem;filter:brightness(0.6) contrast(1.25) saturate(1.1) drop-shadow(0 4px 16px rgba(184,146,74,0.18));}
 .f-script{font-family:var(--script);font-size:1.9rem;color:var(--gold);display:block;}
 .f-links{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin:1.1rem 0;}
 .f-links a{font-family:var(--display);font-size:0.56rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink-lt);transition:color 0.3s;}
@@ -1106,8 +1116,8 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
     <div class="wardrobe-day">
       <div class="wd-hdr reveal"><div class="wd-lbl">Day One &nbsp;&middot;&nbsp; 4th December 2026</div><div class="wd-name">Holy Matrimony</div></div>
       <div class="w-cards">
-        <div class="w-card reveal"><div class="wc-time">3:00 PM — Church Ceremony</div><div class="wc-name">Marriage Nuptials</div><p class="wc-desc">This one calls for formal and modest: think covered shoulders, thoughtful lengths, and an elegance that photographs beautifully in the pews. A light shawl or stole keeps things demure inside the church.</p><div class="wc-code">Formal &amp; Modest — Church Ceremony</div><div class="palette"><div class="swatch" style="background:#c9a96e;"></div><div class="swatch" style="background:#2d3a2e;"></div><div class="swatch" style="background:#6b2020;"></div><div class="swatch" style="background:#1a1a2e;"></div></div><p class="palette-note">Women: Cocktail dress, jumpsuit, or elegant gown, with a shawl for the church &nbsp;&middot;&nbsp; Men: A tailored suit for the ceremony</p></div>
-        <div class="w-card reveal d1"><div class="wc-time">6:00 PM Onward — Reception</div><div class="wc-name">Reception</div><p class="wc-desc">No wardrobe change is required — the ceremony look eases naturally into golden hour. That said, an outfit change is more than welcome if you'd like to switch into something more open, as per your liking — just be mindful that time must permit it. Shawl off, touch-up done, and now the fun begins: strappy, off-shoulder, no restrictions here — women can go as bold as they like, and both women and men are free to dress it up, loosen up, and lean into the evening.</p><div class="wc-code">Semi-Formal to Festive — Change Optional</div><div class="palette"><div class="swatch" style="background:#c9a96e;"></div><div class="swatch" style="background:#2d3a2e;"></div><div class="swatch" style="background:#6b2020;"></div><div class="swatch" style="background:#1a1a2e;"></div></div><p class="palette-note">Women: Stay in your look, or switch into something bolder — off-shoulder, strappy, fully your call &nbsp;&middot;&nbsp; Men: Lose the jacket, roll up the sleeves, dress it up or down as you like</p></div>
+        <div class="w-card reveal"><div class="wc-time">3:00 PM — Church Ceremony</div><div class="wc-name">Marriage Nuptials</div><p class="wc-desc">This one calls for formal and modest: think covered shoulders, thoughtful lengths, and an elegance that photographs beautifully in the pews. A light shawl or stole keeps things demure inside the church.</p><div class="wc-code">Formal &amp; Modest — Church Ceremony</div><div class="palette"><div class="swatch" style="background:#c9a96e;"></div><div class="swatch" style="background:#2d3a2e;"></div><div class="swatch" style="background:#6b2020;"></div><div class="swatch" style="background:#1a1a2e;"></div></div><p class="palette-note">Women: Cocktail dress or elegant gown, with a shawl for the church &nbsp;&middot;&nbsp; Men: A tailored suit for the ceremony</p></div>
+        <div class="w-card reveal d1"><div class="wc-time">6:00 PM Onward — Reception</div><div class="wc-name">Reception</div><p class="wc-desc">No wardrobe change is required — the ceremony look eases naturally into golden hour. That said, an outfit change is more than welcome if you'd like to switch into something more open, as per your liking — just be mindful that time must permit it. Shawl off, touch-up done, and now the fun begins — both women and men are free to dress it up, loosen up, and lean into the evening.</p><div class="wc-code">Semi-Formal to Festive — Change Optional</div><div class="palette"><div class="swatch" style="background:#c9a96e;"></div><div class="swatch" style="background:#2d3a2e;"></div><div class="swatch" style="background:#6b2020;"></div><div class="swatch" style="background:#1a1a2e;"></div></div><p class="palette-note">Women: Stay in your look, or elevate into something more evening-ready — entirely your call &nbsp;&middot;&nbsp; Men: Lose the jacket, roll up the sleeves, dress it up or down as you like</p></div>
         <div class="w-card reveal d2 wc-caution" style="grid-column:1/-1;"><p class="wc-caution-text">Wear whatever you like, just not white. We already have a bride, we don't need an understudy.</p></div>
       </div>
     </div>
