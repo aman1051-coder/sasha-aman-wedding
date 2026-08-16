@@ -739,7 +739,22 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
      pulsing hint above) for a quick glance or swipe, AND the
      hamburger is always there too, opening the full guaranteed-
      complete list as a full-screen menu. Neither replaces the
-     other. */
+     other.
+     The compact row needs its own readable size here rather than
+     inheriting desktop's clamp() — at real phone widths that clamp
+     bottoms out around 8.6px, and at that size all 7 links happen
+     to fit with zero overflow, which meant there was nothing to
+     scroll at all: the row wasn't broken, it just never needed to
+     move, while also being too small to comfortably read or tap. */
+  .nav-btn{font-size:0.75rem;padding:0.6rem 0.85rem;letter-spacing:2px;}
+  /* justify-content:flex-end (desktop's default, right-aligning the
+     row) pushes overflow off the *left* edge once these are big
+     enough to actually overflow — and scrollLeft can't reach content
+     positioned there, so Home/Story become permanently stuck
+     off-screen with no way to scroll to them. flex-start keeps the
+     first items anchored in view and puts the overflow on the
+     trailing edge instead, where the scroll hint is already pointing. */
+  .nav-links:not(.open){justify-content:flex-start;}
   .nav-links.open{
     display:flex !important;
     position:fixed;inset:0;
@@ -774,7 +789,6 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   .log-grid{grid-template-columns:repeat(3,1fr);}
 }
 @media(max-width:380px){
-  .nav-btn{font-size:0.5rem;padding:0.4rem 0.55rem;}
   .cd-grid{gap:0.9rem;}
 }
 </style>
@@ -1293,18 +1307,25 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
     btn.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
   }
 
+  const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown'];
   function attemptAutoplay(){
     if(userPaused || !audio.paused) return;
-    audio.play().then(()=>setPlayingUI(true)).catch(()=>{ /* still blocked — next interaction will retry */ });
+    audio.play().then(()=>{
+      setPlayingUI(true);
+      // Only stop listening once it actually worked. 'scroll' used to
+      // be in this list too, but scrolling doesn't count as a "user
+      // gesture" to the browser's autoplay policy — play() would
+      // silently fail on it, and since cleanup ran regardless of
+      // success, that one failed attempt could permanently use up
+      // the only try, leaving every later, genuinely qualifying tap
+      // with nothing left listening. Now every qualifying interaction
+      // keeps retrying until one actually succeeds.
+      unlockEvents.forEach(ev=>document.removeEventListener(ev, attemptAutoplay));
+    }).catch(()=>{ /* still blocked — the next interaction will retry */ });
   }
 
   attemptAutoplay();
-  const unlockEvents = ['pointerdown','touchstart','touchend','click','keydown','scroll'];
-  function onFirstInteraction(){
-    attemptAutoplay();
-    unlockEvents.forEach(ev=>document.removeEventListener(ev, onFirstInteraction));
-  }
-  unlockEvents.forEach(ev=>document.addEventListener(ev, onFirstInteraction, {passive:true}));
+  unlockEvents.forEach(ev=>document.addEventListener(ev, attemptAutoplay, {passive:true}));
 
   window.toggleMusic = function(){
     if(audio.paused){
