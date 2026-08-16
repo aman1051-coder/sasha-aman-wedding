@@ -41,8 +41,8 @@
    loader instead of flashing white. JS swaps it to the site's own
    ivory once the intro finishes, so it never shows dark again later,
    e.g. on iOS overscroll bounce. */
-html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;}
-body{background:var(--ivory);color:var(--ink);font-family:var(--sans);font-weight:300;overflow-x:hidden;cursor:none;}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;overflow-x:hidden;width:100%;}
+body{background:var(--ivory);color:var(--ink);font-family:var(--sans);font-weight:300;overflow-x:hidden;width:100%;cursor:none;}
 body.locked{overflow:hidden;height:100svh;}
 img{max-width:100%;display:block;}
 a{color:inherit;text-decoration:none;}
