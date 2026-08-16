@@ -228,6 +228,21 @@ nav.scrolled .nav-toggle{color:var(--ink-mid);}
 .nav-toggle.open span:nth-child(2){opacity:0;}
 .nav-toggle.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
 .nav-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+/* Tablet-width hint: between the hamburger (phones) and the point
+   where all 7 links fit in a row without scrolling, the nav stays a
+   horizontally scrollable row — but this time with a gently pulsing
+   chevron so it's obvious there's more to scroll to, unlike before. */
+.nav-scroll-hint{display:none;}
+@media(min-width:481px) and (max-width:899px){
+  .nav-scroll-hint{
+    display:flex;align-items:center;justify-content:center;
+    width:16px;flex-shrink:0;font-size:1.1rem;line-height:1;
+    animation:navHintPulse 1.8s ease-in-out infinite;pointer-events:none;
+  }
+  nav:not(.scrolled) .nav-scroll-hint{color:rgba(255,255,255,0.75);}
+  nav.scrolled .nav-scroll-hint{color:var(--gold);}
+}
+@keyframes navHintPulse{0%,100%{transform:translateX(0);opacity:0.45;}50%{transform:translateX(4px);opacity:1;}}
 .nav-btn{
   background:none;border:none;
   font-family:var(--display);font-size:clamp(0.54rem,1.2vw,0.64rem);
@@ -717,7 +732,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
    hint anything was cut off. Below the breakpoint, the link list
    becomes a full-screen menu instead: every section listed at once,
    nothing to scroll past or miss. */
-@media(max-width:768px){
+@media(max-width:480px){
   .nav-toggle{display:flex;}
   /* display:none/flex, not opacity — the same proven pattern as the
      lightbox (#lb) elsewhere on this page. A fade transition here
@@ -813,6 +828,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
     <li><button class="nav-btn" onclick="go('page-rsvp',5)">RSVP</button></li>
     <li><button class="nav-btn" onclick="go('page-gallery',6)">Gallery</button></li>
   </ul>
+  <div class="nav-scroll-hint" aria-hidden="true">&#8250;</div>
   <button type="button" id="nav-toggle" class="nav-toggle" onclick="toggleMobileNav()" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
@@ -1344,6 +1360,30 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   setMasonryImg(1, wardrobeBg);
   setMasonryImg(2, itineraryBg);
   setMasonryImg(3, storyBg);
+
+  /* Browsers generally don't decode a background-image (or an <img>)
+     that's inside a display:none ancestor — every subsection except
+     Home starts out that way, so the very first time a guest opens
+     one, its photo may need to decode right at the moment it becomes
+     visible. That decode isn't instant for a large image, and it's
+     the leading suspect for an intermittent blank/undecoded flash
+     right at the top of a subsection's header on first visit. Warm
+     every one of them up now, during the several seconds the loader
+     is already holding guests on a black screen, so decoding is long
+     finished before anyone can possibly navigate to see it. */
+  const decodeUrls = new Set();
+  document.querySelectorAll('.hero-bg, .ph-bg').forEach(el=>{
+    const m = (el.style.backgroundImage||'').match(/url\(["']?(.*?)["']?\)$/);
+    if(m && m[1]) decodeUrls.add(m[1]);
+  });
+  document.querySelectorAll('.masonry img, .v-gallery img, .venue-hero-img').forEach(imgEl=>{
+    if(imgEl.src) decodeUrls.add(imgEl.src);
+  });
+  decodeUrls.forEach(url=>{
+    const warm = new Image();
+    warm.src = url;
+    if(warm.decode) warm.decode().catch(()=>{});
+  });
 })();
 
 /* ══════════════════════════════════════════
@@ -1654,7 +1694,9 @@ function go(id,i){
   navBtns.forEach(b=>b.classList.remove('active'));
   navBtns[i].classList.add('active');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const newPage = document.getElementById(id);
+  newPage.classList.add('active');
+  void newPage.offsetHeight; // force the browser to lay out the new page now, synchronously, before anything below measures it
   document.getElementById('nav').classList.toggle('scrolled', id==='page-rsvp');
   fireShutter();
   pageTransitionBurst();
