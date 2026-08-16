@@ -211,7 +211,14 @@ nav.scrolled{
 /* The three bars stay a compact 26x22 visually, but the actual
    tappable button is padded out to the 44x44 minimum touch target —
    the icon doesn't need to look bigger for the tap area to be. */
-.nav-toggle{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;padding:11px 9px;background:none;border:none;flex-shrink:0;cursor:none;}
+/* margin-left:auto keeps this anchored to the nav bar's right edge on
+   its own, independent of its siblings. It matters once the menu is
+   open: .nav-links.open switches to position:fixed, which pulls it
+   out of nav's flex layout entirely, so nothing is left pushing the
+   toggle rightward — without this, it visibly jumps to wherever the
+   remaining children collapse to, landing well left of where it (and
+   the menu itself) was opened from. */
+.nav-toggle{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;padding:11px 9px;margin-left:auto;background:none;border:none;flex-shrink:0;cursor:none;}
 .nav-toggle span{display:block;width:100%;height:1.5px;background:currentColor;transition:transform 0.3s,opacity 0.3s;}
 nav:not(.scrolled) .nav-toggle{color:#fff;}
 nav.scrolled .nav-toggle{color:var(--ink-mid);}
