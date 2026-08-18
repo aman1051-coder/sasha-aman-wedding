@@ -554,31 +554,46 @@ body.intro-done .hero-date{animation:hUp 1.1s ease 0.65s forwards;}
 .btn-rsvp::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);transform:translateX(-100%);animation:btnShimmer 3.5s ease-in-out infinite;}
 @keyframes btnShimmer{0%{transform:translateX(-100%);}18%{transform:translateX(100%);}100%{transform:translateX(100%);}}
 .btn-rsvp:hover{transform:translateY(-3px);}
-/* Echoes the opening loader's ink-bloom moment (same three colors,
-   same stagger/rotation choreography) as the RSVP success message.
-   The loader uses mix-blend-mode:screen against a near-black
-   backdrop, which is how it gets that vivid glow - the same trick
-   would nearly vanish against this card's light ivory background, so
-   these use plain soft radial washes instead to land the same effect
-   in a light context. */
-/* min-height + flex centering gives the blooms (up to 170px across)
-   actual room - the box used to be sized to just its one line of
-   text (~110px), so overflow:hidden was clipping most of each bloom
-   before it ever became visible. */
-.rsvp-ok{display:none;position:relative;overflow:hidden;min-height:180px;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;color:var(--sage);font-size:1.05rem;text-align:center;padding:1rem;}
-.ok-bloom{position:absolute;top:50%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:0;pointer-events:none;filter:blur(18px);}
-.ok-bloom.b1{left:50%;width:170px;background:radial-gradient(circle,rgba(212,170,106,0.55),transparent 70%);}
-.ok-bloom.b2{left:42%;top:58%;width:130px;background:radial-gradient(circle,rgba(196,144,122,0.45),transparent 70%);}
-.ok-bloom.b3{left:60%;top:40%;width:105px;background:radial-gradient(circle,rgba(122,154,126,0.4),transparent 70%);}
-.rsvp-ok.play .ok-bloom.b1{animation:okBloom1 1.5s cubic-bezier(0.16,0.6,0.24,1) forwards;}
-.rsvp-ok.play .ok-bloom.b2{animation:okBloom2 1.5s cubic-bezier(0.16,0.6,0.24,1) 0.15s forwards;}
-.rsvp-ok.play .ok-bloom.b3{animation:okBloom3 1.5s cubic-bezier(0.16,0.6,0.24,1) 0.3s forwards;}
-@keyframes okBloom1{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:0;}50%{opacity:0.75;}100%{transform:translate(-50%,-50%) scale(1) rotate(6deg);opacity:0.55;}}
-@keyframes okBloom2{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:0;}50%{opacity:0.65;}100%{transform:translate(-50%,-50%) scale(1) rotate(-8deg);opacity:0.5;}}
-@keyframes okBloom3{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:0;}50%{opacity:0.6;}100%{transform:translate(-50%,-50%) scale(1) rotate(10deg);opacity:0.45;}}
-.ok-content{position:relative;z-index:2;opacity:0;transform:translateY(8px);}
-.rsvp-ok.play .ok-content{animation:okContentIn 0.7s ease 0.55s forwards;}
-@keyframes okContentIn{to{opacity:1;transform:translateY(0);}}
+/* The big moment now happens in the full-screen #rsvp-celebrate
+   overlay below (echoing the opening loader) - this compact box is
+   just the calm, permanent record left on the page once that
+   overlay's been dismissed, so it stays plain rather than competing
+   with its own smaller animation. */
+.rsvp-ok{display:none;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;color:var(--sage);font-size:1.05rem;text-align:center;padding:1.5rem 1rem;}
+
+/* ─────────────── RSVP CELEBRATION (full-screen) ───────────────
+   Deliberately reuses the opening loader's exact technique - same
+   three colors, same mix-blend-mode:screen-on-dark-backdrop trick
+   (that's what gives the blooms their glow; it barely shows on a
+   light background), same stagger/rotation choreography - so
+   submitting an RSVP genuinely echoes the moment the site opened,
+   just in reverse and to celebrate. Skippable by tap/click/key like
+   the loader, and auto-dismisses on its own after a few seconds. */
+#rsvp-celebrate{
+  position:fixed;inset:0;z-index:99992;
+  background:radial-gradient(ellipse at 50% 45%,#161009 0%,#0a0806 55%,#050403 100%);
+  display:none;align-items:center;justify-content:center;
+  opacity:0;transition:opacity 0.7s ease;cursor:none;
+}
+#rsvp-celebrate.play{opacity:1;}
+.cel-bloom{position:absolute;top:50%;left:50%;aspect-ratio:1;mix-blend-mode:screen;border-radius:50%;transform:translate(-50%,-50%) scale(0) rotate(0deg);filter:blur(9vmin);opacity:0;pointer-events:none;}
+.cel-bloom.cb1{width:62vmin;background:radial-gradient(circle,rgba(212,170,106,0.5),transparent 70%);}
+.cel-bloom.cb2{width:48vmin;left:47%;top:55%;background:radial-gradient(circle,rgba(196,144,122,0.42),transparent 70%);}
+.cel-bloom.cb3{width:38vmin;left:55%;top:43%;background:radial-gradient(circle,rgba(122,154,126,0.36),transparent 70%);}
+.cel-bloom.cb4{width:28vmin;left:41%;top:38%;background:radial-gradient(circle,rgba(184,146,74,0.32),transparent 70%);}
+#rsvp-celebrate.play .cel-bloom.cb1{animation:celBloom 1.7s cubic-bezier(0.16,0.6,0.24,1) forwards;}
+#rsvp-celebrate.play .cel-bloom.cb2{animation:celBloom 1.7s cubic-bezier(0.16,0.6,0.24,1) 0.18s forwards;}
+#rsvp-celebrate.play .cel-bloom.cb3{animation:celBloom 1.7s cubic-bezier(0.16,0.6,0.24,1) 0.34s forwards;}
+#rsvp-celebrate.play .cel-bloom.cb4{animation:celBloom 1.7s cubic-bezier(0.16,0.6,0.24,1) 0.48s forwards;}
+.cel-bloom.cb1{--rot:6deg;} .cel-bloom.cb2{--rot:-8deg;} .cel-bloom.cb3{--rot:10deg;} .cel-bloom.cb4{--rot:-5deg;}
+@keyframes celBloom{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:0;}55%{opacity:0.85;}100%{transform:translate(-50%,-50%) scale(1) rotate(var(--rot));opacity:0.8;}}
+.cel-content{position:relative;z-index:2;text-align:center;padding:0 1.5rem;opacity:0;transform:translateY(14px);}
+#rsvp-celebrate.play .cel-content{animation:celContentIn 0.9s ease 0.7s forwards;}
+@keyframes celContentIn{to{opacity:1;transform:translateY(0);}}
+.cel-heart{display:block;color:var(--gold-lt);font-size:2.2rem;margin-bottom:0.9rem;filter:drop-shadow(0 2px 16px rgba(212,170,106,0.45));}
+.cel-msg{font-family:var(--script);font-size:clamp(2rem,7vw,3rem);color:#fff;line-height:1.3;text-shadow:0 2px 24px rgba(0,0,0,0.45);}
+.cel-hint{font-family:var(--display);font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-top:2rem;opacity:0;}
+#rsvp-celebrate.play .cel-hint{animation:celContentIn 0.9s ease 1.6s forwards;}
 
 /* ─────────────── PAGE HEADERS (subsites) ─────────────── */
 /* Full-bleed photo blending into page via CSS mask gradient */
@@ -908,6 +923,19 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   <button id="lb-prev">&#8249;</button>
   <img id="lb-img" src="" alt="">
   <button id="lb-next">&#8250;</button>
+</div>
+
+<!-- RSVP CELEBRATION — full-screen echo of the opening loader -->
+<div id="rsvp-celebrate">
+  <div class="cel-bloom cb1"></div>
+  <div class="cel-bloom cb2"></div>
+  <div class="cel-bloom cb3"></div>
+  <div class="cel-bloom cb4"></div>
+  <div class="cel-content">
+    <span class="cel-heart">&#9825;</span>
+    <div class="cel-msg">We can't wait<br>to see you in Goa!</div>
+    <div class="cel-hint">Tap anywhere to continue</div>
+  </div>
 </div>
 
 <!-- ═════════════ NAV ═════════════ -->
@@ -1308,12 +1336,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
         <div class="rsvp-script">We'd love to have you</div>
         <div class="rsvp-orn"><span class="rsvp-orn-l"></span><span class="rsvp-orn-gem">&#9670;</span><span class="rsvp-orn-r"></span></div>
         <p class="rsvp-deadline">Kindly RSVP by 31st October 2026</p>
-        <div id="rsvp-ok" class="rsvp-ok">
-          <div class="ok-bloom b1"></div>
-          <div class="ok-bloom b2"></div>
-          <div class="ok-bloom b3"></div>
-          <div class="ok-content">&#9825; &nbsp;We can't wait to see you in Goa!</div>
-        </div>
+        <div id="rsvp-ok" class="rsvp-ok">&#9825; &nbsp;We can't wait to see you in Goa!</div>
         <form class="rsvp-form" id="rsvp-form" onsubmit="doRSVP(event)">
           <input type="hidden" name="attending" id="rsvp-attending" value="yes">
           <div class="rsvp-toggle" role="group" aria-label="Will you be attending?">
@@ -2037,17 +2060,8 @@ async function doRSVP(e){
       form.style.display='none';
       const ok = document.getElementById('rsvp-ok');
       ok.style.display='flex';
-      ok.classList.add('play'); // triggers the ink-bloom keyframes
-      // Safety net: the message text itself only becomes visible via
-      // the animation's own end state. If the animation doesn't fire
-      // for any reason (reduced-motion edge cases, a rendering hiccup)
-      // a guest must never be left looking at an apparently-blank box
-      // after submitting - force it visible well after the animation
-      // (~1.25s total) should have finished either way.
-      setTimeout(()=>{
-        const content = ok.querySelector('.ok-content');
-        if(content){ content.style.opacity='1'; content.style.transform='none'; }
-      }, 1800);
+      ok.style.opacity='1'; // plain and always-visible - the celebration below carries the moment
+      celebrateRSVP();
     }
     else{btn.textContent='Please try again';btn.disabled=false;}
   }catch{
@@ -2057,6 +2071,34 @@ async function doRSVP(e){
     // when it hadn't. Treat it the same as a failed response instead.
     btn.textContent='Please try again';btn.disabled=false;
   }
+}
+
+/* Full-screen RSVP celebration - see the #rsvp-celebrate CSS comment
+   for why this deliberately echoes the opening loader. Dismissible by
+   tap/click/key like the loader, and settles on its own if a guest
+   just waits. */
+function celebrateRSVP(){
+  const cel = document.getElementById('rsvp-celebrate');
+  cel.style.display = 'flex';
+  requestAnimationFrame(()=>{ cel.classList.add('play'); });
+
+  let dismissed = false;
+  let autoTimer;
+  function dismiss(){
+    if(dismissed) return;
+    dismissed = true;
+    clearTimeout(autoTimer);
+    cel.classList.remove('play');
+    setTimeout(()=>{ cel.style.display = 'none'; }, 700);
+    cel.removeEventListener('click', dismiss);
+    cel.removeEventListener('touchend', dismiss);
+    document.removeEventListener('keydown', onKey);
+  }
+  function onKey(e){ if(e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') dismiss(); }
+  cel.addEventListener('click', dismiss);
+  cel.addEventListener('touchend', dismiss);
+  document.addEventListener('keydown', onKey);
+  autoTimer = setTimeout(dismiss, 4200);
 }
 
 /* ══════════════════════════════════════════
