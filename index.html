@@ -592,6 +592,11 @@ body.intro-done .hero-date{animation:hUp 1.1s ease 0.65s forwards;}
 @keyframes celContentIn{to{opacity:1;transform:translateY(0);}}
 .cel-heart{display:block;color:var(--gold-lt);font-size:2.2rem;margin-bottom:0.9rem;filter:drop-shadow(0 2px 16px rgba(212,170,106,0.45));}
 .cel-msg{font-family:var(--script);font-size:clamp(2rem,7vw,3rem);color:#fff;line-height:1.3;text-shadow:0 2px 24px rgba(0,0,0,0.45);}
+/* The decline message is a full sentence, not a short phrase - the
+   big swirly script that suits "we can't wait!" would wrap it across
+   many oversized lines for a moment that should read as gentle, not
+   celebratory. */
+.cel-msg.decline{font-family:var(--serif);font-style:italic;font-weight:600;font-size:clamp(1.15rem,3.4vw,1.5rem);line-height:1.7;max-width:480px;margin:0 auto;text-shadow:0 1px 12px rgba(0,0,0,0.4);}
 .cel-hint{font-family:var(--display);font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-top:2rem;opacity:0;}
 #rsvp-celebrate.play .cel-hint{animation:celContentIn 0.9s ease 1.6s forwards;}
 
@@ -933,7 +938,7 @@ footer{background:var(--cream);border-top:1px solid var(--parch);padding:3rem 1.
   <div class="cel-bloom cb4"></div>
   <div class="cel-content">
     <span class="cel-heart">&#9825;</span>
-    <div class="cel-msg">We can't wait<br>to see you in Goa!</div>
+    <div class="cel-msg" id="cel-msg">We can't wait<br>to see you in Goa!</div>
     <div class="cel-hint">Tap anywhere to continue</div>
   </div>
 </div>
@@ -2058,7 +2063,18 @@ async function doRSVP(e){
     });
     if(r.ok){
       form.style.display='none';
+      const declined = document.getElementById('rsvp-attending').value === 'no';
       const ok = document.getElementById('rsvp-ok');
+      const celMsg = document.getElementById('cel-msg');
+      if(declined){
+        ok.textContent = "We're sorry you won't be able to join us, but you'll certainly be missed! ❤️";
+        celMsg.textContent = "We're sorry you won't be able to join us, but you'll certainly be missed! ❤️";
+        celMsg.classList.add('decline');
+      } else {
+        ok.innerHTML = '&#9825; &nbsp;We can\'t wait to see you in Goa!';
+        celMsg.innerHTML = "We can't wait<br>to see you in Goa!";
+        celMsg.classList.remove('decline');
+      }
       ok.style.display='flex';
       ok.style.opacity='1'; // plain and always-visible - the celebration below carries the moment
       celebrateRSVP();
